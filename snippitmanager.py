@@ -35,9 +35,10 @@ class Manager(ttk.Frame):
         tk.Button(self, text='Add', width=BUTTON_WIDTH).grid(column=0, row=1, sticky='w')
         tk.Button(self, text='Remove', width=BUTTON_WIDTH, command=self.deletefromlist).grid(column=0, row=2, sticky='w')
         tk.Button(self, text='Edit', width=BUTTON_WIDTH).grid(column=0, row=3, sticky='w')
+        tk.Button(self, text='Search', width=int(BUTTON_WIDTH/2)).grid(column=3, row=0)
 
         # Entry
-        ttk.Entry(self, text='weed', width=BOX_WIDTH*2).grid(column=1, row=0, columnspan=3, sticky='w')
+        ttk.Entry(self, text='weed', width=BOX_WIDTH).grid(column=1, row=0, columnspan=3, sticky='w')
 
         # Listbox
         self.y_scroll = tk.Scrollbar(self, orient=tk.VERTICAL) # Scrolling
@@ -49,15 +50,22 @@ class Manager(ttk.Frame):
         self.y_scroll['command'] = self.code_list.yview
 
         # Text
-        self.code_text = tk.Text(self, width=BOX_WIDTH, height=LINE_HEIGHT)
+        self.y_scroll2 = tk.Scrollbar(self, orient=tk.VERTICAL) # Scrolling
+        self.y_scroll2.grid(column=4, row=1, rowspan=4) 
+        self.x_scroll = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self.x_scroll.grid(column=3, row=4, columnspan=4)
+
+        self.code_text = tk.Text(self, width=BOX_WIDTH, height=LINE_HEIGHT, yscrollcommand=self.y_scroll2.set, xscrollcommand=self.x_scroll.set)
         self.code_text.grid(column=3, row=1, rowspan=3)
 
+        self.y_scroll2['command'] = self.code_text.yview
+        self.x_scroll['command'] = self.code_text.xview
         self.font=tkfont.Font(font=self.code_text['font'])
         self.code_text.config(tabs=(self.font.measure('    ')), state=tk.DISABLED) # Disabling editing the text on the main window
 
         # Formatting
         for child in self.winfo_children():
-            child.grid_configure(padx=2, pady=2)
+            child.grid_configure(padx=1, pady=1)
 
         for i in TEST:
             self.code_list.insert(tk.END, i)

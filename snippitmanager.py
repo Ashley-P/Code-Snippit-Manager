@@ -6,7 +6,8 @@ from tkinter import messagebox
 
 
 BUTTON_WIDTH = 10
-BOX_WIDTH = 100
+BOX_WIDTH = 50
+LINE_HEIGHT = 15
 TEST = list('abcdefghijklmnopqrstuvwxyz')
 
 class Manager(ttk.Frame):
@@ -36,27 +37,27 @@ class Manager(ttk.Frame):
         tk.Button(self, text='Edit', width=BUTTON_WIDTH).grid(column=0, row=3, sticky='w')
 
         # Entry
-        tk.Entry(self, text='weed', width=BOX_WIDTH).grid(column=1, row=0, columnspan=4, sticky='e')
+        ttk.Entry(self, text='weed', width=BOX_WIDTH*2).grid(column=1, row=0, columnspan=3, sticky='w')
 
         # Listbox
-        self.y_scroll = tk.Scrollbar(self, orient=tk.VERTICAL)
+        self.y_scroll = tk.Scrollbar(self, orient=tk.VERTICAL) # Scrolling
         self.y_scroll.grid(column=2, row=1, rowspan=4, sticky='nsw')
 
-        self.code_list = tk.Listbox(self, selectmode=tk.SINGLE, yscrollcommand=self.y_scroll.set, width=15)
+        self.code_list = tk.Listbox(self, selectmode=tk.SINGLE, yscrollcommand=self.y_scroll.set, width=15, height=LINE_HEIGHT)
         self.code_list.grid(column=1, row=1, rowspan=4)
         
         self.y_scroll['command'] = self.code_list.yview
 
         # Text
-        self.code_text = tk.Text(self)
-        self.code_text.grid(column=4, row=1)
+        self.code_text = tk.Text(self, width=BOX_WIDTH, height=LINE_HEIGHT)
+        self.code_text.grid(column=3, row=1, rowspan=3)
 
         self.font=tkfont.Font(font=self.code_text['font'])
-        self.code_text.config(tabs=(self.font.measure('    ')), state=tk.DISABLED)
+        self.code_text.config(tabs=(self.font.measure('    ')), state=tk.DISABLED) # Disabling editing the text on the main window
 
         # Formatting
         for child in self.winfo_children():
-            child.grid_configure(padx=1, pady=1)
+            child.grid_configure(padx=2, pady=2)
 
         for i in TEST:
             self.code_list.insert(tk.END, i)

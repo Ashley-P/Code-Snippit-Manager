@@ -8,6 +8,7 @@ from tkinter import messagebox
 BUTTON_WIDTH = 10
 BOX_WIDTH = 50
 LINE_HEIGHT = 15
+CODE_LIST = []
 
 
 
@@ -26,6 +27,17 @@ class AutoScrollbar(tk.Scrollbar):
 
     def place(self, **kwargs):
         pass
+
+
+class CodeClass(object):
+    '''Class which holds the info for each code snippit'''
+    __slots__ = ['name', 'description', 'code', 'language', 'code_type']
+    def __init__(self, name, description, code, language, code_type):
+        self.name = name
+        self.description = description
+        self.code = code
+        self.language = language
+        self.code_type = code_type
 
 
 class Manager(tk.Frame):

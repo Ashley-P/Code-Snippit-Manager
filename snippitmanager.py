@@ -31,12 +31,11 @@ class AutoScrollbar(tk.Scrollbar):
 
 class CodeClass(object):
     '''Class which holds the info for each code snippit'''
-    __slots__ = ['name', 'description', 'code', 'language', 'code_type']
-    def __init__(self, name, description, code, language, code_type):
+    __slots__ = ['name', 'description', 'code', 'code_type']
+    def __init__(self, name, description, code, code_type):
         self.name = name
         self.description = description
         self.code = code
-        self.language = language
         self.code_type = code_type
 
 
@@ -46,10 +45,6 @@ class Manager(tk.Frame):
         tk.Frame.__init__(self, master)
         self.grid(sticky='nsew')
         self.init_gui()
-
-    def new_window(self, code_class=None):
-        self.win = AddEditWindow(code_class)
-        self.win.grab_set()
 
     def init_gui(self):
         # Making the frame stick to the window
@@ -140,6 +135,11 @@ class Manager(tk.Frame):
             except:
                 pass
 
+    def new_window(self, code_class=None):
+        self.win = AddEditWindow(code_class)
+        self.win.grab_set()
+
+
 
 class AddEditWindow(tk.Toplevel):
     '''Joint window for adding and editing code snippits'''
@@ -179,10 +179,18 @@ class AddEditWindow(tk.Toplevel):
         self.code_frame.grid_columnconfigure(0, weight=1)
         self.code_frame.grid_rowconfigure(0, weight=1)
 
+        self.radio_frame = tk.Frame(self.main_frame, bd=2, relief=tk.SUNKEN)
+        self.radio_frame.grid(column=0, row=3, columnspan=2)
+
+        self.button_frame = tk.Frame(self.main_frame)
+        self.button_frame.grid(column=0, row=4, pady=5, columnspan=2)
+
         # Labels
         tk.Label(self.main_frame, text='Name:').grid(column=0, row=0, padx=5)
         tk.Label(self.main_frame, text='Description:').grid(column=0, row=1, padx=5)
         tk.Label(self.main_frame, text='Code:').grid(column=0, row=2, padx=5)
+        
+        tk.Label(self.radio_frame, text='Code Type:').grid(column=0, row=0, columnspan=3)
         
         # Entry
         self.name_entry = tk.Entry(self.main_frame)
@@ -196,7 +204,7 @@ class AddEditWindow(tk.Toplevel):
                                                                 xscrollcommand=self.description_text_xscroll.set, 
                                                                 wrap="none",
                                                                 width=BOX_WIDTH,
-                                                                height=LINE_HEIGHT)
+                                                                height=int(LINE_HEIGHT/2))
 
         self.description_text_yscroll.config(command=self.description_text.yview)
         self.description_text_xscroll.config(command=self.description_text.xview)
@@ -213,7 +221,7 @@ class AddEditWindow(tk.Toplevel):
                                                   xscrollcommand=self.code_text_xscroll.set, 
                                                   wrap="none",
                                                   width=BOX_WIDTH,
-                                                  height=LINE_HEIGHT)
+                                                  height=int(LINE_HEIGHT/2))
 
         self.code_text_yscroll.config(command=self.code_text.yview)
         self.code_text_xscroll.config(command=self.code_text.xview)
@@ -222,6 +230,16 @@ class AddEditWindow(tk.Toplevel):
         self.code_text_yscroll.grid(column=1, row=0, sticky='nse')
         self.code_text_xscroll.grid(column=0, row=1, sticky='sew')
 
+        # Radio Buttons
+        self.code_type = tk.StringVar()
+
+        ttk.Radiobutton(self.radio_frame, text='Class', variable=self.code_type, value='Class').grid(column=0, row=1)
+        ttk.Radiobutton(self.radio_frame, text='Function', variable=self.code_type, value='Function').grid(column=1, row=1)
+        ttk.Radiobutton(self.radio_frame, text='Other', variable=self.code_type, value='Other').grid(column=2, row=1)
+
+        # Buttons
+        tk.Button(self.button_frame, text='Ok', width=BUTTON_WIDTH, command=None).pack(side=tk.LEFT)
+        tk.Button(self.button_frame, text='Cancel', width=BUTTON_WIDTH, command=self.destroy).pack(side=tk.RIGHT)
 
 
 if __name__ == "__main__":

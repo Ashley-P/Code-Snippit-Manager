@@ -6,14 +6,15 @@ Small program for saving and managing code snippits
 
 ## Features
 
-- [ ] Snippit manipulation	
-	- [ ] Add snippit
-	- [ ] Remove snippit
-	- [ ] Edit snippit
-	- [ ] Copy snippit to clipboard
+- [x] Snippit manipulation	
+	- [x] Add snippit
+	- [x] Remove snippit
+	- [x] Edit snippit
+	- [x] Copy snippit to clipboard
 	
 - [ ] Saving
 - [ ] Loading
 	
-- [ ] List by/only Classes/Functions/Language/Other
+- [ ] List by/only Classes/Functions/Other
 - [ ] Direct searching
+

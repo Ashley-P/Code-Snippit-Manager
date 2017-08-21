@@ -2,13 +2,15 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import filedialog
+import subprocess
 
 
 
 BUTTON_WIDTH = 10
 BOX_WIDTH = 50
 LINE_HEIGHT = 15
-CODE_LIST = []
+CODE_LIST = {}
 
 
 
@@ -46,6 +48,39 @@ class Manager(tk.Frame):
         self.grid(sticky='nsew')
         self.init_gui()
 
+    def new_window(self, code_class=None):
+        self.win = AddEditWindow(code_class)
+        self.win.grab_set()
+        self.update_list()
+
+    def update_list(self):
+        self.code_list.delete(0, 'end')
+        for i in CODE_LIST.keys():
+            self.code_list.insert('end', i)
+
+    def on_listbox_select(self, *args):
+        self.i = self.code_list.curselection()
+        self.code_text['state'] = tk.NORMAL
+        try:
+            self.code_text.delete(1.0, 'end')
+            self.code_text.insert('end', CODE_LIST[self.code_list.get(self.i[0])].code)
+        except IndexError:
+            pass
+        self.code_text['state'] = tk.DISABLED
+
+    def remove(self):
+        self.x = self.code_list.curselection()
+        del CODE_LIST[self.code_list.get(self.x[0])]
+        self.code_list.delete(self.x[0])
+        self.code_text['state'] = tk.NORMAL
+        self.code_text.delete(1.0, 'end')
+        self.code_text['state'] = tk.DISABLED
+
+    def copy_to_clipboard(self, word):
+        subprocess.run(['clip.exe'], input=word.strip().encode('utf-8'), check=True)
+        print("Done!")
+
+
     def init_gui(self):
         # Making the frame stick to the window
         self.top = self.winfo_toplevel()
@@ -82,20 +117,21 @@ class Manager(tk.Frame):
         self.text_frame.grid_rowconfigure(1, weight=0)
 
         # Buttons
-        tk.Button(self.button_frame, text='Add', width=BUTTON_WIDTH, command=lambda:self.new_window()).pack()
-        tk.Button(self.button_frame, text='Remove', width=BUTTON_WIDTH, command=None).pack()
-        tk.Button(self.button_frame, text='Edit', width=BUTTON_WIDTH, command=None).pack()
-        tk.Button(self.button_frame, text='Copy', width=BUTTON_WIDTH, command=None).pack()
+        tk.Button(self.button_frame, text='Add', width=BUTTON_WIDTH, command=self.new_window).pack()
+        tk.Button(self.button_frame, text='Remove', width=BUTTON_WIDTH, command=self.remove).pack()
+        tk.Button(self.button_frame, text='Edit', width=BUTTON_WIDTH, command=lambda:self.new_window(CODE_LIST[self.code_list.get(self.code_list.curselection()[0])])).pack()
+        tk.Button(self.button_frame, text='Copy', width=BUTTON_WIDTH, command=lambda:self.copy_to_clipboard(self.code_text.get('1.0', 'end'))).pack()
 
         tk.Button(self.search_frame, text='Search', width=int(BUTTON_WIDTH/2), command=None).grid(column=1, row=0, sticky='e', padx=1, pady=1)
             
         # Listbox
         self.code_list_scroll = AutoScrollbar(self.listbox_frame, orient=tk.VERTICAL)
-        self.code_list = tk.Listbox(self.listbox_frame, yscrollcommand=self.code_list_scroll.set, width=LINE_HEIGHT, height=LINE_HEIGHT)
+        self.code_list = tk.Listbox(self.listbox_frame, yscrollcommand=self.code_list_scroll.set, selectmode=tk.SINGLE, width=LINE_HEIGHT, height=LINE_HEIGHT)
+        self.code_list.bind("<<ListboxSelect>>", self.on_listbox_select)
         self.code_list_scroll.config(command=self.code_list.yview)
 
         self.code_list.grid(column=0, row=0, sticky='ns')
-        self.code_list_scroll.grid(column=1, row=0)
+        self.code_list_scroll.grid(column=1, row=0, sticky='nse')
 
         # Text Box
         self.code_text_yscroll = AutoScrollbar(self.text_frame, orient=tk.VERTICAL)
@@ -104,9 +140,14 @@ class Manager(tk.Frame):
         self.code_text = tk.Text(self.text_frame, yscrollcommand=self.code_text_yscroll.set,
                                                   xscrollcommand=self.code_text_xscroll.set, 
                                                   wrap="none",
-                                                  state=tk.DISABLED,
                                                   width=BOX_WIDTH,
                                                   height=LINE_HEIGHT)
+
+        self.font = tkfont.Font(font=self.code_text['font'])
+        self.tab_width = self.font.measure(' ' * 4)
+        self.code_text.config(tabs=(self.tab_width,))
+
+        self.code_text['state'] = tk.DISABLED
 
         self.code_text_yscroll.config(command=self.code_text.yview)
         self.code_text_xscroll.config(command=self.code_text.xview)
@@ -135,9 +176,7 @@ class Manager(tk.Frame):
             except:
                 pass
 
-    def new_window(self, code_class=None):
-        self.win = AddEditWindow(code_class)
-        self.win.grab_set()
+
 
 
 
@@ -148,6 +187,37 @@ class AddEditWindow(tk.Toplevel):
         self.code_class = code_class
         self.grid()
         self.init_gui()
+        if self.code_class != None:
+            self.name_entry.insert("end", self.code_class.name)
+            self.description_text.insert("end", self.code_class.description)
+            self.code_text.insert("end", self.code_class.code)
+            self.code_type.set(self.code_class.code_type)
+        else:
+            pass
+
+    def create_class(self):
+        CODE_LIST[self.name_entry.get()] = CodeClass(name=self.name_entry.get(),
+                                           description=self.description_text.get('1.0', 'end'),
+                                           code=self.code_text.get('1.0', 'end'),
+                                           code_type=self.code_type.get())
+        app.update_list()
+        self.destroy()
+
+    def edit_class(self):
+        del CODE_LIST[self.code_class.name]
+        CODE_LIST[self.name_entry.get()] = self.code_class
+        self.code_class.name = self.name_entry.get()
+        self.code_class.description = self.description_text.get('1.0', 'end')
+        self.code_class.code = self.code_text.get('1.0', 'end')
+        self.code_class.code_type = self.code_type.get()
+        app.update_list()
+        self.destroy()
+
+    def choose_create_edit(self, *args, **kwargs):
+        if self.code_class == None:
+            self.create_class()
+        else:
+            self.edit_class()
 
     def init_gui(self):
         self.top = self.winfo_toplevel()
@@ -223,6 +293,10 @@ class AddEditWindow(tk.Toplevel):
                                                   width=BOX_WIDTH,
                                                   height=int(LINE_HEIGHT/2))
 
+        self.font = tkfont.Font(font=self.code_text['font'])
+        self.tab_width = self.font.measure(' ' * 4)
+        self.code_text.config(tabs=(self.tab_width,))
+
         self.code_text_yscroll.config(command=self.code_text.yview)
         self.code_text_xscroll.config(command=self.code_text.xview)
 
@@ -238,8 +312,9 @@ class AddEditWindow(tk.Toplevel):
         ttk.Radiobutton(self.radio_frame, text='Other', variable=self.code_type, value='Other').grid(column=2, row=1)
 
         # Buttons
-        tk.Button(self.button_frame, text='Ok', width=BUTTON_WIDTH, command=None).pack(side=tk.LEFT)
+        tk.Button(self.button_frame, text='Ok', width=BUTTON_WIDTH, command=self.choose_create_edit).pack(side=tk.LEFT)
         tk.Button(self.button_frame, text='Cancel', width=BUTTON_WIDTH, command=self.destroy).pack(side=tk.RIGHT)
+
 
 
 if __name__ == "__main__":

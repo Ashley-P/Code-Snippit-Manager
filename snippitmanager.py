@@ -82,7 +82,7 @@ class Manager(tk.Frame):
 
     def copy_to_clipboard(self, word):
         subprocess.run(['clip.exe'], input=word.strip().encode('utf-8'), check=True)
-        print("Done!")
+        self.bell()
 
     def save(self):
         global CODE_LIST
@@ -96,7 +96,6 @@ class Manager(tk.Frame):
         self.load_file_dest = filedialog.askopenfilename(defaultextension='.snip', filetypes=[("Code Snippits", "*.snip")])
         self.load_file = open(self.load_file_dest, 'rb')
         CODE_LIST = pickle.load(self.load_file)
-        print(CODE_LIST)
         self.load_file.close()
         self.update_list()
 

@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
 import subprocess
+import pickle
 
 
 
@@ -80,6 +81,11 @@ class Manager(tk.Frame):
         subprocess.run(['clip.exe'], input=word.strip().encode('utf-8'), check=True)
         print("Done!")
 
+    def save(self):
+        save_file_dest = filedialog.asksaveasfilename(defaultextension='.snip', filetypes=[("Code Snippits", "*.snip")])
+        save_file = open(save_file_dest, 'wb')
+        pickle.dump(CODE_LIST, save_file, protocol=pickle.HIGHEST_PROTOCOL)
+        save_file.close()
 
     def init_gui(self):
         # Making the frame stick to the window
@@ -167,7 +173,7 @@ class Manager(tk.Frame):
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label='File', menu=self.filemenu)
         self.filemenu.add_command(label='Open', command=None)
-        self.filemenu.add_command(label='Save', command=None)
+        self.filemenu.add_command(label='Save', command=self.save)
 
         # Formatting
         for child in self.winfo_children():

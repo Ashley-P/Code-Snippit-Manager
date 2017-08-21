@@ -12,9 +12,8 @@ Small program for saving and managing code snippits
 	- [x] Edit snippit
 	- [x] Copy snippit to clipboard
 	
-- [ ] Saving
-- [ ] Loading
+- [x] Saving
+- [x] Loading
 	
 - [ ] List by/only Classes/Functions/Other
 - [ ] Direct searching
-

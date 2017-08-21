@@ -55,11 +55,13 @@ class Manager(tk.Frame):
         self.update_list()
 
     def update_list(self):
+        global CODE_LIST
         self.code_list.delete(0, 'end')
         for i in CODE_LIST.keys():
             self.code_list.insert('end', i)
 
     def on_listbox_select(self, *args):
+        global CODE_LIST
         self.i = self.code_list.curselection()
         self.code_text['state'] = tk.NORMAL
         try:
@@ -70,6 +72,7 @@ class Manager(tk.Frame):
         self.code_text['state'] = tk.DISABLED
 
     def remove(self):
+        global CODE_LIST
         self.x = self.code_list.curselection()
         del CODE_LIST[self.code_list.get(self.x[0])]
         self.code_list.delete(self.x[0])
@@ -82,12 +85,23 @@ class Manager(tk.Frame):
         print("Done!")
 
     def save(self):
-        save_file_dest = filedialog.asksaveasfilename(defaultextension='.snip', filetypes=[("Code Snippits", "*.snip")])
-        save_file = open(save_file_dest, 'wb')
-        pickle.dump(CODE_LIST, save_file, protocol=pickle.HIGHEST_PROTOCOL)
-        save_file.close()
+        global CODE_LIST
+        self.save_file_dest = filedialog.asksaveasfilename(defaultextension='.snip', filetypes=[("Code Snippits", "*.snip")])
+        self.save_file = open(self.save_file_dest, 'wb')
+        pickle.dump(CODE_LIST, self.save_file, protocol=pickle.HIGHEST_PROTOCOL)
+        self.save_file.close()
+
+    def load(self):
+        global CODE_LIST
+        self.load_file_dest = filedialog.askopenfilename(defaultextension='.snip', filetypes=[("Code Snippits", "*.snip")])
+        self.load_file = open(self.load_file_dest, 'rb')
+        CODE_LIST = pickle.load(self.load_file)
+        print(CODE_LIST)
+        self.load_file.close()
+        self.update_list()
 
     def init_gui(self):
+        global CODE_LIST
         # Making the frame stick to the window
         self.top = self.winfo_toplevel()
         self.top.rowconfigure(0, weight=1)
@@ -172,7 +186,7 @@ class Manager(tk.Frame):
 
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label='File', menu=self.filemenu)
-        self.filemenu.add_command(label='Open', command=None)
+        self.filemenu.add_command(label='Open', command=self.load)
         self.filemenu.add_command(label='Save', command=self.save)
 
         # Formatting
@@ -202,6 +216,7 @@ class AddEditWindow(tk.Toplevel):
             pass
 
     def create_class(self):
+        global CODE_LIST
         CODE_LIST[self.name_entry.get()] = CodeClass(name=self.name_entry.get(),
                                            description=self.description_text.get('1.0', 'end'),
                                            code=self.code_text.get('1.0', 'end'),
@@ -210,6 +225,7 @@ class AddEditWindow(tk.Toplevel):
         self.destroy()
 
     def edit_class(self):
+        global CODE_LIST
         del CODE_LIST[self.code_class.name]
         CODE_LIST[self.name_entry.get()] = self.code_class
         self.code_class.name = self.name_entry.get()

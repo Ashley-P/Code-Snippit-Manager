@@ -1,2 +1,5 @@
 # Storage files
 *.snip
+
+# Other
+*.txt

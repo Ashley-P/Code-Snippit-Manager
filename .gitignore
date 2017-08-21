@@ -1,4 +1,5 @@
 # Storage files
-.bak
-.dat
-.dir
+*.snip
+
+# Other
+*.txt
